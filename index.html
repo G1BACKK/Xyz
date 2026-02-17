@@ -3,34 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratch Card - Pay ₹19.99</title>
+    <title>Scratch Card - Direct Pay ₹19.99</title>
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
             min-height: 100vh;
-            background: #1a1a1a;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 10px;
         }
 
         .container {
-            width: 380px;
+            width: 100%;
+            max-width: 400px;
             position: relative;
         }
 
-        .scratch-area {
+        .scratch-card {
             position: relative;
             width: 100%;
-            height: 500px;
-            border-radius: 20px;
+            aspect-ratio: 4/5;
+            border-radius: 30px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            border: 3px solid gold;
+            cursor: pointer;
         }
 
-        /* Base Image (1st image) */
-        #baseImage {
+        /* Hidden image (1st image) */
+        #hiddenImage {
             position: absolute;
             width: 100%;
             height: 100%;
@@ -38,89 +47,171 @@
             z-index: 1;
         }
 
-        /* Scratch Canvas (2nd image overlay) */
+        /* Scratch overlay (2nd image) */
         #scratchCanvas {
             position: absolute;
             width: 100%;
             height: 100%;
             z-index: 2;
-            cursor: pointer;
+            cursor: grab;
         }
 
-        /* Payment Bar at bottom */
-        .payment-bar {
+        /* Pay Overlay - appears after scratching */
+        .pay-overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 30%;
+            height: 35%;
             background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            z-index: 3;
+            z-index: 10;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             color: white;
-            border-top: 3px solid gold;
+            border-top: 4px solid gold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
         }
 
-        .payment-bar:hover {
+        .pay-overlay:hover {
+            height: 40%;
             background: linear-gradient(45deg, #ff4b2b, #ff416c);
-            height: 32%;
         }
 
-        .payment-bar .price {
-            font-size: 36px;
+        .pay-overlay .price {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 10px 0;
+            text-shadow: 0 0 20px gold;
+            animation: pulse 1.5s infinite;
+        }
+
+        .pay-overlay .title {
+            font-size: 24px;
             font-weight: bold;
-            margin: 5px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
         }
 
-        .payment-bar .small {
-            font-size: 14px;
+        .pay-overlay .sub {
+            font-size: 16px;
             background: rgba(0,0,0,0.3);
-            padding: 5px 15px;
-            border-radius: 20px;
+            padding: 8px 20px;
+            border-radius: 50px;
+            margin-top: 10px;
         }
 
-        .payment-bar .lock {
-            font-size: 20px;
-            margin-bottom: 5px;
+        .pay-overlay .lock {
+            font-size: 30px;
+            filter: drop-shadow(0 0 10px gold);
         }
 
-        .upi-badge {
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); text-shadow: 0 0 30px gold; }
+            100% { transform: scale(1); }
+        }
+
+        /* Scratch hint */
+        .scratch-hint {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15;
+            background: rgba(0,0,0,0.7);
+            color: gold;
+            padding: 15px 30px;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid gold;
+            backdrop-filter: blur(5px);
+            white-space: nowrap;
+            pointer-events: none;
+            animation: slide 2s infinite;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+            100% { transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Progress */
+        .progress {
             position: absolute;
             top: 10px;
-            right: 10px;
-            background: white;
-            color: #ff416c;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
+            left: 10px;
+            z-index: 15;
+            background: rgba(0,0,0,0.7);
+            color: gold;
+            padding: 6px 15px;
+            border-radius: 30px;
+            font-size: 14px;
+            border: 1px solid gold;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Full image message */
+        .full-image-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 60px;
+            font-size: 24px;
             font-weight: bold;
-            z-index: 4;
+            border: 3px solid gold;
+            box-shadow: 0 0 50px gold;
+            white-space: nowrap;
+            display: none;
+            animation: popIn 0.5s;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            80% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="scratch-area">
-            <!-- UPI Badge -->
-            <div class="upi-badge">⚡ Paytm | GPay | PhonePe</div>
+        <div class="scratch-card">
+            <!-- Hidden full image (1st image) -->
+            <img id="hiddenImage" src="https://files.catbox.moe/kgnkui.jpeg" alt="Full Image" crossorigin="anonymous">
             
-            <!-- Base Image (1st image - what you see after scratching) -->
-            <img id="baseImage" src="https://files.catbox.moe/kgnkui.jpeg" alt="Base Image">
-            
-            <!-- Scratch Canvas (shows 2nd image as overlay) -->
+            <!-- Scratch layer (2nd image overlay) -->
             <canvas id="scratchCanvas"></canvas>
             
-            <!-- Payment Bar (click to pay) -->
-            <div class="payment-bar" onclick="tryRedirectUPI()">
+            <!-- Scratch hint -->
+            <div class="scratch-hint" id="scratchHint">
+                👆 SCRATCH HERE BIG 👆
+            </div>
+            
+            <!-- Progress -->
+            <div class="progress" id="progress">
+                0% revealed
+            </div>
+            
+            <!-- Pay Overlay (BIG PAY BUTTON) -->
+            <div class="pay-overlay" id="payButton" onclick="redirectToUPI()">
                 <div class="lock">🔒</div>
+                <div class="title">🔥 UNLOCK NOW 🔥</div>
                 <div class="price">₹19.99</div>
-                <div class="small">tap to pay & view full image</div>
+                <div class="sub">👆 TAP TO PAY & SEE FULL IMAGE 👆</div>
+            </div>
+            
+            <!-- Full image message -->
+            <div class="full-image-msg" id="fullImageMsg">
+                🎉 FULL IMAGE REVEALED! PAY TO VIEW 🎉
             </div>
         </div>
     </div>
@@ -128,34 +219,55 @@
     <script>
         const canvas = document.getElementById('scratchCanvas');
         const ctx = canvas.getContext('2d');
-        const baseImage = document.getElementById('baseImage');
-        
-        // Set canvas size
-        canvas.width = 380;
-        canvas.height = 500;
-        
-        // Load overlay image (2nd image)
-        const overlayImage = new Image();
-        overlayImage.crossOrigin = "Anonymous";
-        overlayImage.src = "https://files.catbox.moe/mzu5hi.jpeg";
-        
-        overlayImage.onload = function() {
-            // Draw overlay image with blur
-            ctx.filter = 'blur(8px)';
-            ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
-            ctx.filter = 'none';
+        const hiddenImage = document.getElementById('hiddenImage');
+        const progressEl = document.getElementById('progress');
+        const scratchHint = document.getElementById('scratchHint');
+        const payButton = document.getElementById('payButton');
+        const fullImageMsg = document.getElementById('fullImageMsg');
+
+        // Set canvas size (BIG SCRATCH AREA)
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            initOverlay();
+        }
+
+        // Initialize overlay with 2nd image
+        function initOverlay() {
+            const overlayImage = new Image();
+            overlayImage.crossOrigin = "Anonymous";
+            overlayImage.src = "https://files.catbox.moe/mzu5hi.jpeg";
             
-            // Add slight scratch texture
-            ctx.fillStyle = 'rgba(255,255,255,0.1)';
-            for(let i = 0; i < 100; i++) {
-                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height * 0.7, 20, 2);
-            }
-        };
-        
-        // Scratch functionality
+            overlayImage.onload = () => {
+                // Draw overlay with heavy blur (scratch layer)
+                ctx.filter = 'blur(15px) brightness(1.2)';
+                ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
+                ctx.filter = 'none';
+                
+                // Add scratch texture
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                for(let i = 0; i < 200; i++) {
+                    ctx.fillRect(
+                        Math.random() * canvas.width,
+                        Math.random() * canvas.height,
+                        Math.random() * 40 + 10,
+                        Math.random() * 5 + 2
+                    );
+                }
+                
+                // Add silver effect
+                ctx.fillStyle = 'rgba(192,192,192,0.3)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            };
+        }
+
+        // Scratch variables
         let isScratching = false;
         let lastX, lastY;
-        
+        let scratchCount = 0;
+
+        // Get coordinates
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
             const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
@@ -165,76 +277,122 @@
                 y: (y / rect.height) * canvas.height
             };
         }
-        
+
+        // Start scratching (BIG AREA - ENTIRE CARD)
         function startScratch(e) {
             e.preventDefault();
             const pos = getPos(e);
-            
-            // Only scratch in top 70%
-            if (pos.y > canvas.height * 0.7) return;
             
             isScratching = true;
             lastX = pos.x;
             lastY = pos.y;
             
+            // Hide hint after first scratch
+            scratchHint.style.opacity = '0';
+            setTimeout(() => scratchHint.style.display = 'none', 500);
+            
+            // Setup scratch style (BIG LINES)
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = 30;
+            ctx.lineWidth = 45; // BIG scratch width
             ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
             ctx.beginPath();
             ctx.moveTo(lastX, lastY);
         }
-        
+
+        // Scratch (BIG area)
         function scratch(e) {
             e.preventDefault();
             if (!isScratching) return;
             
             const pos = getPos(e);
             
-            // Stop if reaches bottom
-            if (pos.y > canvas.height * 0.7) {
-                isScratching = false;
-                return;
-            }
-            
+            // Draw BIG scratch line
             ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            
+            // Add extra BIG scratches for effect
+            ctx.beginPath();
+            ctx.moveTo(lastX + (Math.random() - 0.5) * 30, lastY + (Math.random() - 0.5) * 30);
+            ctx.lineTo(pos.x + (Math.random() - 0.5) * 30, pos.y + (Math.random() - 0.5) * 30);
             ctx.stroke();
             
             lastX = pos.x;
             lastY = pos.y;
+            
+            // Update progress
+            updateProgress();
         }
-        
+
+        // Stop scratching
         function stopScratch() {
             isScratching = false;
             ctx.globalCompositeOperation = 'source-over';
         }
-        
-        // EXACT PAYMENT FUNCTION FROM YOUR CODE (with amount changed to 19.99)
-        function tryRedirectUPI() {
-            const pa = "gigablast.cf@axisbank";
-            const pn = "";
-            const tr = "";
-            const tn = "";
-            const am = "1999";  // Changed from "1" to "19.99"
-            const cu = "INR";
 
+        // Update scratch progress
+        function updateProgress() {
+            scratchCount++;
+            
+            // Check how much is scratched
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            let cleared = 0;
+            
+            for (let i = 3; i < data.length; i += 4) {
+                if (data[i] < 10) cleared++;
+            }
+            
+            const percent = Math.min(100, Math.round((cleared / (data.length / 4)) * 100));
+            progressEl.textContent = percent + '% revealed';
+            
+            // If scratched enough, show message
+            if (percent > 40 && scratchCount > 20) {
+                fullImageMsg.style.display = 'block';
+                setTimeout(() => {
+                    fullImageMsg.style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        // DIRECT UPI REDIRECT FUNCTION
+        function redirectToUPI() {
+            // Add click effect
+            payButton.style.transform = 'scale(0.95)';
+            setTimeout(() => payButton.style.transform = '', 200);
+            
+            // UPI details
+            const upiID = "paytmqr281005050101y6h4kwjia9ia@paytm";
+            const amount = "19.99";
+            const name = "Scratch Card";
+            const note = "Payment for full image";
+            
+            // Try all UPI apps directly
             const urls = [
-                `paytmmp://pay?pa=${pa}&pn=${pn}&tr=${tr}&tn=${tn}&am=${am}&cu=${cu}`,
-                `gpay://upi/pay?pa=${pa}&pn=${pn}&tr=${tr}&tn=${tn}&am=${am}&cu=${cu}`,
-                `phonepe://pay?pa=${pa}&pn=${pn}&tr=${tr}&tn=${tn}&am=${am}&cu=${cu}`
+                `paytmmp://pay?pa=${upiID}&pn=${name}&am=${amount}&tn=${note}&cu=INR`,
+                `gpay://upi/pay?pa=${upiID}&pn=${name}&am=${amount}&tn=${note}&cu=INR`,
+                `phonepe://pay?pa=${upiID}&pn=${name}&am=${amount}&tn=${note}&cu=INR`,
+                `upi://pay?pa=${upiID}&pn=${name}&am=${amount}&tn=${note}&cu=INR`
             ];
-
+            
+            // Try each app
             let index = 0;
-
             function tryNext() {
                 if (index >= urls.length) return;
                 window.location.href = urls[index];
                 index++;
-                setTimeout(tryNext, 800);
+                setTimeout(tryNext, 500);
             }
-
+            
             tryNext();
+            
+            // Show message
+            fullImageMsg.textContent = "✅ Redirecting to UPI App...";
+            fullImageMsg.style.display = 'block';
+            setTimeout(() => fullImageMsg.style.display = 'none', 2000);
         }
-        
+
         // Event listeners
         canvas.addEventListener('mousedown', startScratch);
         canvas.addEventListener('mousemove', scratch);
@@ -245,10 +403,16 @@
         canvas.addEventListener('touchmove', scratch);
         canvas.addEventListener('touchend', stopScratch);
         canvas.addEventListener('touchcancel', stopScratch);
-        
-        // Log when images load
-        baseImage.onload = () => console.log('✅ Base image loaded');
-        baseImage.onerror = () => console.log('❌ Base image failed to load');
+
+        // Prevent default touch behavior
+        canvas.addEventListener('touchstart', (e) => e.preventDefault());
+        canvas.addEventListener('touchmove', (e) => e.preventDefault());
+
+        // Initialize
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        console.log('✅ BIG Scratch Card Ready - Pay ₹19.99 to see full image');
     </script>
 </body>
 </html>
